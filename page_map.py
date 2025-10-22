@@ -10,7 +10,7 @@ with st.sidebar:
  st.header("這裡是側邊攔")
  #選擇框
 option = st.selectbox(
-"選擇底圖(Basemap),
+"選擇底圖(Basemap)",
 ("OpenTopoMap", "Esri.WorldImagery", "CartoDB.DarkMatter")
 ) 
 
@@ -21,9 +21,8 @@ cog_url =
 
 # --- 2.向量資料 (GDF) --
 url = 
-"https://naciscdn.org/naturalearth/110m/cultural/ne_110m_admin_0_countries.zi
- p"
- gdf = gpd.read_file(url)
+"https://naciscdn.org/naturalearth/110m/cultural/ne_110m_admin_0_countries.zi"
+gdf = gpd.read_file(url)
 
 # --- 3.建立地圖 --
 m = leafmap.Map(center=[0, 0], zoom=2)
