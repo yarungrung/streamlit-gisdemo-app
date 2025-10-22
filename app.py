@@ -1,3 +1,3 @@
 import streamlit as st
-st.title("my first Streamlit App")
+st.title("我的第一個Streamlit App")
 st.header("Hello, Geographers!(From Codespaces!)")
