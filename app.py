@@ -3,10 +3,11 @@ import streamlit as st
 # 1. 使用st.Page() 定義所有頁面
 # 注意：st.Page()會自動尋找.py檔案
 # Emoji 列表： https://tw.piliapp.com/emoji/list/
-# pages 
+pages= [ 
 st.Page("page_home.py", title="專案首頁", icon="😎"), 
 st.Page("page_map.py", title="互動地圖瀏覽", icon="😮"),
 st.Page("page_about.py", title="關於我們", icon="🎃") 
+]
 
 # 2. 使用st.navigation() 建立導覽 
 with st.sidebar: 
