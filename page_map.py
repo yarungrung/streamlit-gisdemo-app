@@ -16,7 +16,7 @@ option = st.selectbox(
 
 # --- 1. 網格資料(COG)---
 # 線上的SRTM DEM (全球數值高程模型)
-cog_url = 
+cog_url =
 "https://github.com/opengeos/leafmap/raw/master/examples/data/cog.tif"
 
 # --- 2.向量資料 (GDF) --
