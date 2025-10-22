@@ -1,17 +1,16 @@
  import streamlit as st
  
- st.title("歡迎來到 GIS 專案 ")
- st.write(" Streamlit ö ×_W o_")
+st.title("蔡亞蓉")
+st.header("蔡亞蓉的專案")
+st.write("app的用途介紹")
 
- #  MP4 
- video_url = "https://i.imgur.com/1GoAB0C.mp4"
+ # 將MP4影片的URL傳給st.video() 
+video_url = "https://i.imgur.com/1GoAB0C.mp4"
  
- st.write(f"{video_url}")
- st.video(video_url)
- #  
-w ö
- URL 
-ó
- st.image()
- image_url = "https://i.imgur.com/uf1T4ND.png"
- st.image(image_url)
+st.write(f"正在播放影片：{video_url}")
+
+st.video(video_url)
+
+ # 直接上傳照片的URL傳給st.image()
+image_url = "https://i.imgur.com/uf1T4ND.png"
+st.image(image_url)
