@@ -1,11 +1,11 @@
- import streamlit as st
- import pandas as pd
+import streamlit as st
+import pandas as pd
 
- st.title("Streamlit  Widgets")
+st.title("Streamlit  Widgets")
 
  # 1.把Widgets放到側邊攔(sidebar)
- with st.sidebar:
-  st.header("這裡是側邊攔")
+with st.sidebar:
+ st.header("這裡是側邊攔")
  
  # 選擇框(Selectbox)
  option = st.selectbox(
