@@ -31,4 +31,4 @@ type=["zip", "tif", "json"]
 )
 
 if uploaded_file is not None:
-st.success(f"你上傳了: {uploaded_file.name} (大小 : {uploaded_file.size} bytes)")
+ st.success(f"你上傳了: {uploaded_file.name} (大小 : {uploaded_file.size} bytes)")
