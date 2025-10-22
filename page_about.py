@@ -14,13 +14,13 @@ option = st.selectbox(
  )
  
  # 滑桿(Slider)
- year = st.slider("選擇一個年份:", 1990, 2030, 2024)
+year = st.slider("選擇一個年份:", 1990, 2030, 2024)
  
 st.write(f"軟體: {option}")
 st.write(f"年分: {year}")
  
  # 按鈕(Button)
- if st.button("氣球!"):
+if st.button("氣球!"):
  st.balloons()
  
  #檔案上傳((File Uploader)
