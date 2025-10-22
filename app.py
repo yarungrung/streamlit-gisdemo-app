@@ -22,7 +22,7 @@ st.write(f"你選擇的年份是: {year}")
 
 #按鈕 (Button)
 if st.button("點我顯示氣球!"):
-st.balloons() 
+ st.balloons() 
 
 # 檔案上傳 (File Uploader) - 地理系必備!
 uploaded_file = st.file_uploader(
