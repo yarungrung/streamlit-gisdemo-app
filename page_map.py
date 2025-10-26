@@ -14,7 +14,7 @@ with st.sidebar:
     option = st.selectbox("請選擇底圖", ("OpenTopoMap", "Esri.WorldImagery", "CartoDB.DarkMatter"))
 
 # --- 1. 讀取 JSON 檔案 ---
-url = "桃園桃園市政府公共自行車2.0系統即時資料.JSON"
+url = "桃園市政府公共自行車2.0系統即時資料.JSON"
 
 df = pd.read_json(url)
     
