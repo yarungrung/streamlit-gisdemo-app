@@ -1,44 +1,63 @@
 import streamlit as st
-import leafmap.foliumap as leafmap
+import pandas as pd
 import geopandas as gpd
+from shapely.geometry import Point
+import leafmap.foliumap as leafmap 
+import folium 
 
 st.set_page_config(layout="wide")
-st.title("Leafmap - 向量(Vector) + 網格(Raster)")
+st.title("Leafmap與Geopandas-向量(Vector)")
 
-# 把Widgets放到側邊攔(sidebar)
+# --- 選擇底圖 ---
 with st.sidebar:
- st.header("這裡是側邊攔")
- #選擇框
-option = st.selectbox(
-"選擇底圖(Basemap)",
-("OpenTopoMap", "Esri.WorldImagery", "CartoDB.DarkMatter")
-) 
+    st.header("地圖設定")
+    option = st.selectbox("請選擇底圖", ("OpenTopoMap", "Esri.WorldImagery", "CartoDB.DarkMatter"))
 
-# --- 1. 網格資料(COG)---
-# 線上的SRTM DEM (全球數值高程模型)
-cog_url = "https://github.com/opengeos/leafmap/raw/master/examples/data/cog.tif"
+# --- 1. 讀取 JSON 檔案 ---
+url = "台北市youbike站點分布.json"
 
-# --- 2.向量資料 (GDF) --
-url = "https://naciscdn.org/naturalearth/110m/cultural/ne_110m_admin_0_countries.zi"
-gdf = gpd.read_file(url)
+df = pd.read_json(url)
+    
+st.subheader("資料預覽 (表格)")
+st.dataframe(df.head())
+
+# --- 2. 將經緯度轉成 geometry ---
+try:
+    df["wgsX"] = pd.to_numeric(df["wgsX"], errors='coerce') 
+    df["wgsY"] = pd.to_numeric(df["wgsY"], errors='coerce') 
+    
+    df.dropna(subset=['wgsX', 'wgsY'], inplace=True)
+
+    geometry = [Point(xy) for xy in zip(df["wgsY"], df["wgsX"])] 
+    gdf = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
+    
+    if gdf.empty:
+        st.warning("⚠️ GeoDataFrame (gdf) 為空！請檢查原始 JSON 檔案中是否有有效的 'wgsX' 和 'wgsY' 數值。")
+        st.stop()
+        
+    st.info(f"✅ GeoDataFrame 成功建立，包含 {len(gdf)} 個有效點位。")
+
+except Exception as e:
+    st.error(f"⚠️ 經緯度轉換失敗。錯誤訊息: {e}")
+    st.stop()
 
 # --- 3.建立地圖 --
 m = leafmap.Map(center=[0, 0], zoom=2)
-# --- 4. 加入圖層 --
-# 加入網格圖層(COG)
-m.add_raster(
- cog_url,
- palette="terrain", #使用"terrain"(地形)調色盤 
- layer_name="Global DEM (Raster)"
- )
 
 #加入向量圖層(GDF)
 m.add_gdf(
- gdf,
- layer_name="全球國界(Vector)"  ,
- style={"fillOpacity": 0, "color": "black", "weight": 0.5}# 設為透明，只留邊界
+    gdf,
+    layer_name="路外停車資訊",
+    # 設置標記的樣式
+    marker_kwds={
+        "radius": 6, 
+        "color": "#007BFF", 
+        "fill": True, 
+        "fillColor": "#007BFF", 
+        "fillOpacity": 0.8
+    },
 )
 
-#5.互動控制
+#5.互動控制及顯示地圖
 m.add_layer_control()
 m.to_streamlit(height=700)
