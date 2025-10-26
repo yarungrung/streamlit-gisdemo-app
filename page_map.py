@@ -4,6 +4,7 @@ import geopandas as gpd
 from shapely.geometry import Point
 import leafmap.foliumap as leafmap 
 import requests
+import warnings
 
 st.set_page_config(layout="wide")
 st.title("Leafmap與Geopandas-向量(Vector)")
@@ -14,7 +15,9 @@ with st.sidebar:
     option = st.selectbox("請選擇底圖", ("OpenTopoMap", "Esri.WorldImagery", "CartoDB.DarkMatter"))
 
 # --- 1. 讀取 JSON 檔案 ---
+warnings.filterwarnings("ignore")
 url = "https://data.tycg.gov.tw/api/v1/rest/datastore/a1b4714b-3b75-4ff8-a8f2-cc377e4eaa0f?format=json"
+response = requests.get(url, verify=False)
 data = requests.get(url).json()
 df = pd.DataFrame(data["result"]["records"])
 
