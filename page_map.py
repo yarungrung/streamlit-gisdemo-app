@@ -18,6 +18,18 @@ with st.sidebar:
 warnings.filterwarnings("ignore")
 url = "https://data.tycg.gov.tw/api/v1/rest/datastore/a1b4714b-3b75-4ff8-a8f2-cc377e4eaa0f?format=json"
 response = requests.get(url, verify=False)
+# 先檢查 HTTP 回應狀態
+if response.status_code != 200:
+    print("❌ 無法取得資料，HTTP 狀態碼：", response.status_code)
+    print("回傳內容：", response.text[:500])  # 顯示前500字，幫助你debug
+else:
+    try:
+        data = response.json()
+        print("✅ JSON 讀取成功，共有", len(data), "筆資料")
+    except ValueError:
+        print("❌ JSON 解析失敗，伺服器回傳內容：")
+        print(response.text[:500])
+
 data = response.json()
 df = pd.DataFrame(data["result"]["records"])
 
