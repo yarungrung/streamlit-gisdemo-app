@@ -35,7 +35,7 @@ m.add_raster(
 #加入向量圖層(GDF)
 m.add_gdf(
  gdf,
- layer_name="全球國界(Vector)"  
+ layer_name="全球國界(Vector)"  ,
  style={"fillOpacity": 0, "color": "black", "weight": 0.5}# 設為透明，只留邊界
 )
 
