@@ -1,8 +1,7 @@
 import streamlit as st
  
 st.title("蔡亞蓉")
-st.header("蔡亞蓉的專案")
-st.write("app的用途介紹")
+st.write("此app是用於XXX的")
 
  # 將MP4影片的URL傳給st.video() 
 video_url = "https://i.imgur.com/1GoAB0C.mp4"
