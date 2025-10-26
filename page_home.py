@@ -1,7 +1,7 @@
 import streamlit as st
  
 st.title("蔡亞蓉的運用GIS功課")
-st.write("此app統整了北北桃地區所有yupbike站點店為圖資，供各位參考")
+st.write("此app統整了北北桃地區所有youbike站點店為圖資，供各位參考")
 
  # 將MP4影片的URL傳給st.video() 
 video_url = "https://i.imgur.com/1GoAB0C.mp4"
