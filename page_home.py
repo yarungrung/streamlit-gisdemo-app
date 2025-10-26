@@ -1,6 +1,6 @@
 import streamlit as st
  
-st.title("蔡亞蓉")
+st.title("蔡亞蓉的運用GIS功課")
 st.write("此app是用於XXX的")
 
  # 將MP4影片的URL傳給st.video() 
