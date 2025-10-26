@@ -16,7 +16,7 @@ with st.sidebar:
 
 # --- 1. 讀取 JSON 檔案 ---
 warnings.filterwarnings("ignore")
-url = "https://data.tycg.gov.tw/api/v1/rest/datastore/a1b4714b-3b75-4ff8-a8f2-cc377e4eaa0f?format=json"
+url = "https://data.tycg.gov.tw/opendata/datalist/datasetMeta/download?id=a1b4714b-3b75-4ff8-a8f2-cc377e4eaa0f&rid=4a8a35f8-2a3c-4c07-bf8d-157d5f22c06d"
 response = requests.get(url, verify=False, timeout=15)
 try:
     response = requests.get(url, verify=False, timeout=20)
