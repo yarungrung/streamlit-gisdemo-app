@@ -14,7 +14,7 @@ with st.sidebar:
     option = st.selectbox("請選擇底圖", ("OpenTopoMap", "Esri.WorldImagery", "CartoDB.DarkMatter"))
 
 # --- 1. 讀取 JSON 檔案 ---
-url = "台北市youbike站點分布.json"
+url = "桃園桃園市政府公共自行車2.0系統即時資料.JSON"
 
 df = pd.read_json(url)
     
@@ -47,7 +47,7 @@ m = leafmap.Map(center=[0, 0], zoom=2)
 #加入向量圖層(GDF)
 m.add_gdf(
     gdf,
-    layer_name="路外停車資訊",
+    layer_name="youbike站點資訊",
     # 設置標記的樣式
     marker_kwds={
         "radius": 6, 
