@@ -16,12 +16,10 @@ option = st.selectbox(
 
 # --- 1. 網格資料(COG)---
 # 線上的SRTM DEM (全球數值高程模型)
-cog_url =
-"https://github.com/opengeos/leafmap/raw/master/examples/data/cog.tif"
+cog_url = "https://github.com/opengeos/leafmap/raw/master/examples/data/cog.tif"
 
 # --- 2.向量資料 (GDF) --
-url = 
-"https://naciscdn.org/naturalearth/110m/cultural/ne_110m_admin_0_countries.zi"
+url = "https://naciscdn.org/naturalearth/110m/cultural/ne_110m_admin_0_countries.zi"
 gdf = gpd.read_file(url)
 
 # --- 3.建立地圖 --
@@ -37,8 +35,8 @@ m.add_raster(
 #加入向量圖層(GDF)
 m.add_gdf(
  gdf,
- layer_name="全球國界(Vector)" 
- style={"fillOpacity": 0, "color": "black", "weight": 0.5} # 設為透明，只留邊界
+ layer_name="全球國界(Vector)"  
+ style={"fillOpacity": 0, "color": "black", "weight": 0.5}# 設為透明，只留邊界
 )
 
 #5.互動控制
