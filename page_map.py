@@ -3,7 +3,7 @@ import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
 import leafmap.foliumap as leafmap 
-import folium 
+import requests
 
 st.set_page_config(layout="wide")
 st.title("Leafmap與Geopandas-向量(Vector)")
@@ -14,31 +14,45 @@ with st.sidebar:
     option = st.selectbox("請選擇底圖", ("OpenTopoMap", "Esri.WorldImagery", "CartoDB.DarkMatter"))
 
 # --- 1. 讀取 JSON 檔案 ---
-url = "桃園市政府公共自行車2.0系統即時資料.JSON"
+url = "https://data.tycg.gov.tw/api/v1/rest/datastore/a1b4714b-3b75-4ff8-a8f2-cc377e4eaa0f?format=json"
+data = requests.get(url).json()
+df = pd.DataFrame(data["result"]["records"])
 
-df = pd.read_json(url)
-    
-st.subheader("資料預覽 (表格)")
-st.dataframe(df.head())
-
-# --- 2. 將經緯度轉成 geometry ---
 try:
-    df["wgsX"] = pd.to_numeric(df["wgsX"], errors='coerce') 
-    df["wgsY"] = pd.to_numeric(df["wgsY"], errors='coerce') 
-    
-    df.dropna(subset=['wgsX', 'wgsY'], inplace=True)
+    response = requests.get(url)
+    response.raise_for_status()
+    data = response.json()
 
-    geometry = [Point(xy) for xy in zip(df["wgsY"], df["wgsX"])] 
-    gdf = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
-    
-    if gdf.empty:
-        st.warning("⚠️ GeoDataFrame (gdf) 為空！請檢查原始 JSON 檔案中是否有有效的 'wgsX' 和 'wgsY' 數值。")
-        st.stop()
-        
-    st.info(f"✅ GeoDataFrame 成功建立，包含 {len(gdf)} 個有效點位。")
+    # 從 JSON 結構中提取站點資料
+    records = data["result"]["records"]
+    df = pd.DataFrame(records)
+
+    st.info(f"📥 成功載入 {len(df)} 筆桃園市 YouBike 站點資料")
 
 except Exception as e:
-    st.error(f"⚠️ 經緯度轉換失敗。錯誤訊息: {e}")
+    st.error(f"⚠️ 無法載入桃園市 YouBike JSON 資料：{e}")
+    st.stop()
+
+
+# --- 2. 將經緯度轉換為 geometry ---
+try:
+    # 將 lat / lng 轉成數值型態
+    df["lat"] = pd.to_numeric(df["lat"], errors="coerce")
+    df["lng"] = pd.to_numeric(df["lng"], errors="coerce")
+    df.dropna(subset=["lat", "lng"], inplace=True)
+
+    # 建立幾何點位
+    geometry = [Point(xy) for xy in zip(df["lng"], df["lat"])]
+    gdf = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
+
+    if gdf.empty:
+        st.warning("⚠️ GeoDataFrame 為空，請檢查 JSON 經緯度欄位。")
+        st.stop()
+
+    st.success(f"✅ GeoDataFrame 建立成功，共 {len(gdf)} 個站點。")
+
+except Exception as e:
+    st.error(f"⚠️ 經緯度轉換失敗：{e}")
     st.stop()
 
 # --- 3.建立地圖 --
