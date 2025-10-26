@@ -17,36 +17,35 @@ with st.sidebar:
 # --- 1. 讀取 JSON 檔案 ---
 warnings.filterwarnings("ignore")
 url = "https://data.tycg.gov.tw/api/v1/rest/datastore/a1b4714b-3b75-4ff8-a8f2-cc377e4eaa0f?format=json"
-response = requests.get(url, verify=False)
-# 先檢查 HTTP 回應狀態
-if response.status_code != 200:
-    print("❌ 無法取得資料，HTTP 狀態碼：", response.status_code)
-    print("回傳內容：", response.text[:500])  # 顯示前500字，幫助你debug
-else:
-    try:
-        data = response.json()
-        print("✅ JSON 讀取成功，共有", len(data), "筆資料")
-    except ValueError:
-        print("❌ JSON 解析失敗，伺服器回傳內容：")
-        print(response.text[:500])
-
-data = response.json()
-df = pd.DataFrame(data["result"]["records"])
-
+response = requests.get(url, verify=False, timeout=15)
 try:
-    response = requests.get(url)
-    response.raise_for_status()
+    response = requests.get(url, verify=False, timeout=20)
+    if response.status_code != 200:
+        st.error(f"📡 資料請求失敗：HTTP 狀態碼 {response.status_code}")
+        st.stop()
+    raw_text = response.text[:500]
+    st.write("📄 回傳內容前500字：", raw_text)
     data = response.json()
-
-    # 從 JSON 結構中提取站點資料
     records = data["result"]["records"]
     df = pd.DataFrame(records)
-
-    st.info(f"📥 成功載入 {len(df)} 筆桃園市 YouBike 站點資料")
-
+    st.success(f"資料讀取成功，共 {len(df)} 筆")
 except Exception as e:
-    st.error(f"⚠️ 無法載入桃園市 YouBike JSON 資料：{e}")
+    st.error(f"⚠️ 讀取 JSON 資料失敗：{e}")
     st.stop()
+
+# 接著轉經緯度、建立 geometry …（如下你已經做的部分）
+df["lat"] = pd.to_numeric(df["lat"], errors="coerce")
+df["lng"] = pd.to_numeric(df["lng"], errors="coerce")
+df.dropna(subset=["lat", "lng"], inplace=True)
+
+geometry = [Point(xy) for xy in zip(df["lng"], df["lat"])]
+gdf = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
+
+if gdf.empty:
+    st.warning("⚠️ GeoDataFrame 為空，可能經緯度皆為空。")
+    st.stop()
+
+st.success(f"✅ GeoDataFrame 成功建立，共 {len(gdf)} 站點。")
 
 
 # --- 2. 將經緯度轉換為 geometry ---
