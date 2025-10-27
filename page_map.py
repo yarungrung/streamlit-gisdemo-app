@@ -16,29 +16,30 @@ with st.sidebar:
     option = st.selectbox("請選擇底圖", ("OpenTopoMap", "Esri.WorldImagery", "CartoDB.DarkMatter"))
 
 # --- 1. 讀取本地 JSON 檔案 ---
-file_path = "桃園市政府公共自行車2.0系統即時資料.json"
+uploaded_file = st.file_uploader("上傳 JSON 檔", type="json")
 
-if not os.path.exists(file_path):
-    st.error("❌ 找不到檔案{file_path}")
-    st.stop()
+if uploaded_file is not None:
+    try:
+        data = json.load(uploaded_file)
 
-try:
-    with open(file_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-except Exception as e:
-    st.error(f"⚠️ 無法讀取 JSON 檔案：{e}")
-    st.stop()
+        # 自動偵測資料結構
+        if isinstance(data, dict):
+            # 嘗試從政府開放資料常見格式取出內容
+            records = (
+                data.get("result", {})
+                    .get("records", data)
+            )
+        elif isinstance(data, list):
+            records = data
+        else:
+            st.error("⚠️ 無法識別 JSON 結構，請檢查檔案內容")
+            st.stop()
 
-# --- 2. 解析 JSON 結構 ---
-# 桃園市 YouBike JSON 結構中，實際資料通常在 "result" → "records"
-try:
-    records = data.get("result", {}).get("records", [])
-    if not records:
-        st.warning("⚠️ JSON 檔案中找不到 'records' 資料。請確認檔案內容格式。")
-        st.stop()
-except Exception as e:
-    st.error(f"⚠️ JSON 結構解析失敗：{e}")
-    st.stop()
+        st.success(f"✅ 成功載入 {len(records)} 筆資料！")
+        st.json(records[:3])  # 顯示前 3 筆資料供檢查
+
+    except Exception as e:
+        st.error(f"⚠️ JSON 結構解析失敗：{e}")
 
 # --- 3. 轉成 DataFrame ---
 df = pd.DataFrame(records)
