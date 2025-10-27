@@ -16,7 +16,7 @@ with st.sidebar:
     option = st.selectbox("請選擇底圖", ("OpenTopoMap", "Esri.WorldImagery", "CartoDB.DarkMatter"))
 
 # --- 1. 讀取本地 JSON 檔案 ---
-file_path = "桃園市政府公共自行車2.0系統即時資料.json"
+file_path = "台北市youbike.json"
 
 if not os.path.exists(file_path):
     st.error(f"❌ 找不到 JSON 檔案：{file_path}")
@@ -58,7 +58,7 @@ if df.empty:
     st.stop()
 
 # --- 4. 經緯度欄位轉換 ---
-# 桃園 YouBike 的欄位名稱應該是 "lat"、"lng"
+# YouBike 的欄位名稱應該是 "lat"、"lng"
 try:
     df["lat"] = pd.to_numeric(df["lat"], errors="coerce")
     df["lng"] = pd.to_numeric(df["lng"], errors="coerce")
@@ -86,7 +86,7 @@ try:
         x="lng",
         y="lat",
         popup=["sna", "sarea", "ar"],
-        layer_name="桃園 YouBike 站點"
+        layer_name="台北市 YouBike 站點"
     )
     m.to_streamlit(height=600)
 
