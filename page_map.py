@@ -14,40 +14,72 @@ with st.sidebar:
     st.header("地圖設定")
     option = st.selectbox("請選擇底圖", ("OpenTopoMap", "Esri.WorldImagery", "CartoDB.DarkMatter"))
 
-# --- 1. 讀取 JSON 檔案 ---
-warnings.filterwarnings("ignore")
-url = "https://data.tycg.gov.tw/opendata/datalist/datasetMeta/download?id=a1b4714b-3b75-4ff8-a8f2-cc377e4eaa0f&rid=4a8a35f8-2a3c-4c07-bf8d-157d5f22c06d"
-response = requests.get(url, verify=False, timeout=15)
+# --- 1. 讀取本地 JSON 檔案 ---
+file_path = os.path.join("data", "taoyuan_youbike.json")
+
+if not os.path.exists(file_path):
+    st.error("❌ 找不到 JSON 檔案，請確認檔案已放在 data/ 目錄下。")
+    st.stop()
+
 try:
-    response = requests.get(url, verify=False, timeout=20)
-    if response.status_code != 200:
-        st.error(f"📡 資料請求失敗：HTTP 狀態碼 {response.status_code}")
-        st.stop()
-    raw_text = response.text[:500]
-    st.write("📄 回傳內容前500字：", raw_text)
-    data = response.json()
-    records = data["result"]["records"]
-    df = pd.DataFrame(records)
-    st.success(f"資料讀取成功，共 {len(df)} 筆")
+    with open(file_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
 except Exception as e:
-    st.error(f"⚠️ 讀取 JSON 資料失敗：{e}")
+    st.error(f"⚠️ 無法讀取 JSON 檔案：{e}")
     st.stop()
 
-# 接著轉經緯度、建立 geometry …（如下你已經做的部分）
-df["lat"] = pd.to_numeric(df["lat"], errors="coerce")
-df["lng"] = pd.to_numeric(df["lng"], errors="coerce")
-df.dropna(subset=["lat", "lng"], inplace=True)
-
-geometry = [Point(xy) for xy in zip(df["lng"], df["lat"])]
-gdf = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
-
-if gdf.empty:
-    st.warning("⚠️ GeoDataFrame 為空，可能經緯度皆為空。")
+# --- 2. 解析 JSON 結構 ---
+# 桃園市 YouBike JSON 結構中，實際資料通常在 "result" → "records"
+try:
+    records = data.get("result", {}).get("records", [])
+    if not records:
+        st.warning("⚠️ JSON 檔案中找不到 'records' 資料。請確認檔案內容格式。")
+        st.stop()
+except Exception as e:
+    st.error(f"⚠️ JSON 結構解析失敗：{e}")
     st.stop()
 
-st.success(f"✅ GeoDataFrame 成功建立，共 {len(gdf)} 站點。")
+# --- 3. 轉成 DataFrame ---
+df = pd.DataFrame(records)
+if df.empty:
+    st.warning("⚠️ 轉換後的 DataFrame 為空。請檢查原始 JSON。")
+    st.stop()
 
+# --- 4. 經緯度欄位轉換 ---
+# 桃園 YouBike 的欄位名稱應該是 "lat"、"lng"
+try:
+    df["lat"] = pd.to_numeric(df["lat"], errors="coerce")
+    df["lng"] = pd.to_numeric(df["lng"], errors="coerce")
+    df.dropna(subset=["lat", "lng"], inplace=True)
 
+    # 建立 GeoDataFrame
+    geometry = [Point(xy) for xy in zip(df["lng"], df["lat"])]
+    gdf = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
+
+    if gdf.empty:
+        st.warning("⚠️ GeoDataFrame 為空，請確認經緯度欄位是否正確。")
+        st.stop()
+
+    st.success(f"✅ 成功載入 {len(gdf)} 個站點。")
+
+except Exception as e:
+    st.error(f"⚠️ 經緯度轉換失敗：{e}")
+    st.stop()
+
+# --- 5. 顯示地圖 ---
+try:
+    m = leafmap.Map(center=[24.99, 121.31], zoom=11)
+    m.add_points_from_xy(
+        gdf,
+        x="lng",
+        y="lat",
+        popup=["sna", "sarea", "ar"],
+        layer_name="桃園 YouBike 站點"
+    )
+    m.to_streamlit(height=600)
+
+except Exception as e:
+    st.error(f"⚠️ 地圖繪製失敗：{e}")
 # --- 2. 將經緯度轉換為 geometry ---
 try:
     # 將 lat / lng 轉成數值型態
@@ -73,18 +105,17 @@ except Exception as e:
 m = leafmap.Map(center=[0, 0], zoom=2)
 
 #加入向量圖層(GDF)
-m.add_gdf(
-    gdf,
-    layer_name="youbike站點資訊",
-    # 設置標記的樣式
-    marker_kwds={
-        "radius": 6, 
-        "color": "#007BFF", 
-        "fill": True, 
-        "fillColor": "#007BFF", 
-        "fillOpacity": 0.8
-    },
-)
+
+# --- 5. 顯示地圖 ---
+m = leafmap.Map(center=[24.99, 121.31], zoom=11)
+m.add_points_from_xy(
+        gdf,
+        x="lng",
+        y="lat",
+        popup=["sna", "sarea", "ar"],
+        layer_name="桃園 YouBike 站點"
+    )
+
 
 #5.互動控制及顯示地圖
 m.add_layer_control()
