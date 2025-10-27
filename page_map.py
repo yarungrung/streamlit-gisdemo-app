@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+import json
 import geopandas as gpd
 from shapely.geometry import Point
 import leafmap.foliumap as leafmap 
@@ -15,10 +16,10 @@ with st.sidebar:
     option = st.selectbox("請選擇底圖", ("OpenTopoMap", "Esri.WorldImagery", "CartoDB.DarkMatter"))
 
 # --- 1. 讀取本地 JSON 檔案 ---
-file_path = os.path.join("data", "taoyuan_youbike.json")
+file_path = r"C:\桃園市政府公共自行車2.0系統即時資料.json"
 
 if not os.path.exists(file_path):
-    st.error("❌ 找不到 JSON 檔案，請確認檔案已放在 data/ 目錄下。")
+    st.error("❌ 找不到檔案 ：{file_path}")
     st.stop()
 
 try:
