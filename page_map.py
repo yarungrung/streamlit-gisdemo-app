@@ -16,7 +16,7 @@ with st.sidebar:
     option = st.selectbox("請選擇底圖", ("OpenTopoMap", "Esri.WorldImagery", "CartoDB.DarkMatter"))
 
 # --- 1. 讀取本地 JSON 檔案 ---
-file_path = r"C:\桃園市政府公共自行車2.0系統即時資料.json"
+file_path = "桃園市政府公共自行車2.0系統即時資料.json"
 
 if not os.path.exists(file_path):
     st.error("❌ 找不到檔案{file_path}")
