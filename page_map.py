@@ -43,6 +43,7 @@ try:
     df = pd.DataFrame(records)
     st.success(f"✅ 成功載入 {len(df)} 筆資料！")
     st.dataframe(df.head())
+    st.write("欄位名稱：", list(df.columns))
 
 except json.JSONDecodeError:
     st.error("⚠️ JSON 格式錯誤，請確認檔案內容是否完整。")
@@ -53,19 +54,30 @@ except Exception as e:
 
 # --- 2. 經緯度轉換 + 建立 GeoDataFrame ---"
 try:
-    df["lat"] = pd.to_numeric(df["lat"], errors="coerce")
-    df["lng"] = pd.to_numeric(df["lng"], errors="coerce")
-    df.dropna(subset=["lat", "lng"], inplace=True)
+    # 自動偵測可能的經緯度欄位名稱
+    possible_lat = ["lat", "latitude", "Lat", "Latitude", "LAT", "Y", "y"]
+    possible_lng = ["lng", "lon", "long", "longitude", "Lng", "Longitude", "LON", "X", "x"]
+
+    lat_col = next((col for col in df.columns if col in possible_lat), None)
+    lng_col = next((col for col in df.columns if col in possible_lng), None)
+
+    if lat_col is None or lng_col is None:
+        st.error(f"❌ 找不到經緯度欄位！目前欄位：{list(df.columns)}")
+        st.stop()
+
+    df[lat_col] = pd.to_numeric(df[lat_col], errors="coerce")
+    df[lng_col] = pd.to_numeric(df[lng_col], errors="coerce")
+    df.dropna(subset=[lat_col, lng_col], inplace=True)
 
     # 建立 GeoDataFrame
-    geometry = [Point(xy) for xy in zip(df["lng"], df["lat"])]
+    geometry = [Point(xy) for xy in zip(df[lng_col], df[lat_col])]
     gdf = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
 
     if gdf.empty:
         st.warning("⚠️ GeoDataFrame 為空，請確認經緯度欄位是否正確。")
         st.stop()
 
-    st.success(f"✅ 成功載入 {len(gdf)} 個站點。")
+    st.success(f"✅ GeoDataFrame 建立成功，共 {len(gdf)} 個站點。")
 
 except Exception as e:
     st.error(f"⚠️ 經緯度轉換失敗：{e}")
