@@ -43,7 +43,6 @@ try:
     df = pd.DataFrame(records)
     st.success(f"✅ 成功載入 {len(df)} 筆資料！")
     st.dataframe(df.head())
-    st.write("欄位名稱：", list(df.columns))
 
 except json.JSONDecodeError:
     st.error("⚠️ JSON 格式錯誤，請確認檔案內容是否完整。")
