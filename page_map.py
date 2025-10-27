@@ -88,8 +88,8 @@ try:
     m = leafmap.Map(center=[24.99, 121.31], zoom=11)
     m.add_points_from_xy(
         gdf,
-        x="lng",
-        y="lat",
+        x="longitude",
+        y="latitude",
         popup=["sna", "sarea", "ar"],
         layer_name="台北市 YouBike 站點"
     )
