@@ -16,30 +16,40 @@ with st.sidebar:
     option = st.selectbox("請選擇底圖", ("OpenTopoMap", "Esri.WorldImagery", "CartoDB.DarkMatter"))
 
 # --- 1. 讀取本地 JSON 檔案 ---
-uploaded_file = st.file_uploader("上傳 JSON 檔", type="json")
+file_path = os.path.join("data", "taoyuan_youbike.json")
 
-if uploaded_file is not None:
-    try:
-        data = json.load(uploaded_file)
+if not os.path.exists(file_path):
+    st.error(f"❌ 找不到 JSON 檔案：{file_path}")
+    st.stop()
 
-        # 自動偵測資料結構
-        if isinstance(data, dict):
-            # 嘗試從政府開放資料常見格式取出內容
-            records = (
-                data.get("result", {})
-                    .get("records", data)
-            )
-        elif isinstance(data, list):
+try:
+    with open(file_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    # ✅ 自動偵測 JSON 結構
+    if isinstance(data, dict):
+        # 若是桃園開放資料的格式（dict 裡面包 result → records）
+        records = data.get("result", {}).get("records")
+        if records is None:
+            st.warning("⚠️ JSON 格式中沒有 result/records，改用最外層內容")
             records = data
-        else:
-            st.error("⚠️ 無法識別 JSON 結構，請檢查檔案內容")
-            st.stop()
+    elif isinstance(data, list):
+        records = data
+    else:
+        st.error("⚠️ JSON 結構無法辨識，請確認檔案內容")
+        st.stop()
 
-        st.success(f"✅ 成功載入 {len(records)} 筆資料！")
-        st.json(records[:3])  # 顯示前 3 筆資料供檢查
+    # ✅ 轉成 DataFrame
+    df = pd.DataFrame(records)
+    st.success(f"✅ 成功載入 {len(df)} 筆資料！")
+    st.dataframe(df.head())
 
-    except Exception as e:
-        st.error(f"⚠️ JSON 結構解析失敗：{e}")
+except json.JSONDecodeError:
+    st.error("⚠️ JSON 格式錯誤，請確認檔案內容是否完整。")
+    st.stop()
+except Exception as e:
+    st.error(f"❌ 發生錯誤：{e}")
+    st.stop()
 
 # --- 3. 轉成 DataFrame ---
 df = pd.DataFrame(records)
