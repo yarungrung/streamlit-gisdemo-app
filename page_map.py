@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
+import os
 import geopandas as gpd
 from shapely.geometry import Point
 import leafmap.foliumap as leafmap 
-import requests
-import warnings
+
 
 st.set_page_config(layout="wide")
 st.title("Leafmap與Geopandas-向量(Vector)")
