@@ -19,7 +19,7 @@ with st.sidebar:
 file_path = r"C:\桃園市政府公共自行車2.0系統即時資料.json"
 
 if not os.path.exists(file_path):
-    st.error("❌ 找不到檔案 ：{file_path}")
+    st.error("❌ 找不到檔案{file_path}")
     st.stop()
 
 try:
